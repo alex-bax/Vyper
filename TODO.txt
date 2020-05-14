@@ -1,0 +1,1 @@
+Case Study: https://github.com/zeeguu-ecosystem/Zeeguu-Core/tree/master/zeeguu_core/model

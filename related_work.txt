@@ -1,0 +1,4 @@
+Class Hierarchies + Metrics: https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=1232284
+
+SeeSoft and other tools: https://www.researchgate.net/publication/313657585_The_Code-Map_Metaphor_-_A_Review_of_Its_Use_Within_Software_Visualisations
+

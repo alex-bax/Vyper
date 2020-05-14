@@ -1,0 +1,12 @@
+dist/
+node_modules/
+npm-debug.log
+.DS_Store
+.vscode
+env/
+env*
+venv/
+venv*
+demo.py
+demoJSONArray.py
+
