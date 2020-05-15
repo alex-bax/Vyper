@@ -8,8 +8,9 @@ from flask_cors import CORS, cross_origin
 
 JensDir = "C:/Users/jensf/OneDrive/Skrivebord/flask/FLASK_DEVELOPMENT/online_architecture_visualization/user-upload"
 BaxDir  = "C:/Users/alext/Documents/FLASK_DEVELOPMENT/online_architecture_visualization/user-upload"
+MyDir = "C:/Users/alext/Documents/Vyper/online_architecture_visualization/user-upload"
 
-UPLOAD_FOLDER = JensDir
+UPLOAD_FOLDER = MyDir
 
 app = Flask(__name__, static_folder='../static/dist', template_folder='../static')
 CORS(app)
