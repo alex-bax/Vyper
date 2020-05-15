@@ -9,9 +9,9 @@
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
-  height: 70%;
+  height: 75%;
   overflow: auto;
-  padding-bottom: 70px;
+  padding-bottom: 20px;
 }
 
 .upload {
@@ -22,14 +22,14 @@
   max-width: 90%;
 }
 .uploadSection{
-  margin-bottom: 1%;
+  margin-bottom: 3px;
 }
 
 .btn {
   background-color: #2cbed1;
   color: white;
-  margin-top: 10px;
-  margin-bottom: 10px;
+  margin-top: 5px;
+  margin-bottom: 5px;
 }
 
 .btn2 {
@@ -38,9 +38,8 @@
   margin-right: 4px;
   padding-left: 49px;
   padding-right: 49px;
-  height: 72px;
+  height: 61px;
 }
-
 .overview{
   max-width: 50%;
   min-width: 50%;
@@ -61,7 +60,7 @@
   word-wrap: break-word;
   overflow-y: scroll;
   margin-top: 5px;
-  font-size: 13px;
+  font-size: 14.5px;
 }
 
 .detailsBox h6 {
@@ -91,17 +90,22 @@
 .inputDiv{
   margin-left: 20px;
   min-width: 200px;
-  margin-bottom: 5px;
-  height: 52;
+  margin-bottom: 9px;
+  height: 45;
 }
+
+.inputDiv h6 {
+  margin-bottom: 4px;
+}
+
 .middleSection{
   display: flex;
   justify-content: space-between;
 }
 
 .filter{
-  height: 60px;
-  font-size: 15px;
+  height: 53px;
+  font-size: 14px;
 }
 .topBoxes {
   display: flex;
@@ -126,7 +130,7 @@
 .dropDownSection{
   display: flex;
   float: left;
-  height: 50px;
+  height: 40px;
 }
 
 .selected{

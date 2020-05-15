@@ -130,7 +130,7 @@ render() {
            </div>
         : null}
         <div>
-            <DiagramComponent id="diagram" width={"100%"} height={"75%"} tool={DiagramTools.SingleSelect | DiagramTools.ZoomPan}
+            <DiagramComponent id="diagram" width={"100%"} height={"85%"} tool={DiagramTools.SingleSelect | DiagramTools.ZoomPan}
             //Configures data source
             dataSourceSettings={{
                 id: 'Name',
@@ -228,18 +228,18 @@ render() {
 
                         //Tooltip content
                         if (this.state.selectedMode == "Number Of Ifs") {
-                            tooltipString = '<b>Filename:</b> ' + this.checkNameWidth(node.data.Name) + '<br>' + '<b>Num of ifs:</b> ' + node.data.numOfIfs + '<br>' + '<b>Num of Tern-ifs:</b> ' + node.data.numOfTernIfs + '<br>';
+                            tooltipString = '<b>Filename:</b> ' + this.checkNameWidth(node.data.Name) + '<br>' + '<b>No. ifs:</b> ' + node.data.numOfIfs + '<br>' + '<b>No. tern-ifs:</b> ' + node.data.numOfTernIfs + '<br>';
                         } else if (this.state.selectedMode == "Number Of Functions") {
-                            tooltipString = '<b>Filename:</b> ' + this.checkNameWidth(node.data.Name) + '<br>' + "<b>Num of funcs:</b>" + node.data.numOfFuncs;
+                            tooltipString = '<b>Filename:</b> ' + this.checkNameWidth(node.data.Name) + '<br>' + "<b>No. funcs:</b>" + node.data.numOfFuncs;
                         } else if (this.state.selectedMode == "Number Of Imports") {
-                            tooltipString = '<b>Filename:</b> ' + this.checkNameWidth(node.data.Name) + '<br>' + "<b>Num of imports:</b> " + node.data.numOfImports + '<br>' + '<b>Num of from-imports:</b> '
-                            + node.data.numOfFromImports + '<br>' + '<b>No. *-imports:</b> ' + node.data.numOfStarImports;
+                            tooltipString = '<b>Filename:</b> ' + this.checkNameWidth(node.data.Name) + '<br>' + "<b>No. imports:</b> " + node.data.numOfImports + '<br>' + '<b>No. from-imports:</b> '
+                            + node.data.numOfFromImports + '<br>';
                         }
 
                         node.annotations[0].style = {color: "black"};
 
                     } else if (node.data.Type == 'GenericFile') {
-                        tooltipString = '<b>Filename:</b> ' + this.checkNameWidth(node.data.Name) + '<br>' + '<b>Num of lines:</b> ' + node.data.numOfLines + '<br>' + '<b>Parent dir: </b> ' +  node.data.realParentFolder;
+                        tooltipString = '<b>Filename:</b> ' + this.checkNameWidth(node.data.Name) + '<br>' + '<b>No. lines:</b> ' + node.data.numOfLines + '<br>' + '<b>Parent dir: </b> ' +  node.data.realParentFolder;
                         node.width = 50;
                         node.annotations = [
                             { content: node.data.extension.toUpperCase(), style: { color: "white" },
@@ -262,7 +262,7 @@ render() {
                     } else {    //if Folder
                         node.width = 105;
                         node.height = 30;
-                        let parentDirStr = node.data.Name !== ".git" ? '<b>Direct children:</b> ' + node.data.numChildren : "";
+                        let parentDirStr = node.data.Name !== ".git" ? '<b>No. direct files:</b> ' + node.data.numChildren : "";
                         tooltipString = '<b>Parent dir:</b> ' + this.checkUndefined(node.data.parentFolder) + '<br>' + parentDirStr;
 
                         if (node.data.isGhost) {
@@ -288,7 +288,6 @@ render() {
                     NumberOfFunctions: getGreenToRed(percentTotalFuncs),
                     NumberOfImports: getGreenToRed(percentTotalImports),
                 }
-                // console.log("%totalIMports: ", percentTotalImports);
                 if(node.data.Type == 'Folder' || node.data.Type == 'GenericFile') {
                     node.style.fill = codes[node.data.Type];
                 } else if(node.data.Type == 'File') {

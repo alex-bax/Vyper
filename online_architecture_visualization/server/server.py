@@ -17,12 +17,12 @@ CORS(app)
 
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 app.config["ALLOWED_SRC_EXTENSIONS"] = ["PY"]
-app.config["ALLOWED_GENERIC_EXTENSIONS"] = ["JS","JSX", "FS", "CSS", "HTML", "JAVA", "CS", "SH", "SQL", "MD", "CFG", "GITIGNORE" ]
-app.config["ALLOWED_TEXT_EXTENSIONS"] = ["PDF", "TXT", "DOCX", "MD",  ] #text files and the like
+app.config["ALLOWED_GENERIC_EXTENSIONS"] = ["JS", "JSX", "FS", "CSS", "HTML", "JAVA", "CS", "SH", "SQL", "MD", "CFG" ]
+# app.config["ALLOWED_TEXT_EXTENSIONS"] = ["PDF", "TXT", "DOCX", "MD",  ] #text files and the like
 # app.config["ALLOWED_NONTEXT_EXTENSIONS"] = ["PNG", "IMG", "JPG"]
 app.config['SECRET_KEY'] = 'the very secret key' #flash specific
 
-jsonFinal = {} #whatll be the final json response
+jsonFinal = {} #what will be the final json response
 
 def getJSONResp():
 	return jsonify(jsonFinal)
@@ -37,7 +37,7 @@ def allowed_file(filename, isPython):
 			return True
 		else: return False
 	else:
-		if extension.upper() in (app.config["ALLOWED_GENERIC_EXTENSIONS"] or app.config["ALLOWED_TEXT_EXTENSIONS"]):
+		if extension.upper() in (app.config["ALLOWED_GENERIC_EXTENSIONS"]):
 			return True
 		else: return False
 
@@ -47,18 +47,15 @@ def makeJSONObj(parser, jsonObj):
 	if parser is not None: #if there was no error parsing the file, give default val if necessary
 		importStarList = list(parser.importStars)
 		importFromList = str(parser.importsFrom)
-
-		# print("importFroms (str):", str(parser.importsFrom))
-		# print("importFroms:", importFromList)
-
-		# if importStarList: importStarList = importStarList[len(importStarList)-1].replace(',','') #TODO: remove ',' of last index
+		numOfFromImp  = parser.getNumFromImports()
 
 		jsonObj['funcNames'] = parser.funcNames if parser.funcNames else ""
 		jsonObj['numOfLines'] = parser.getNumOfLines() if parser.getNumOfLines() else 0
 		jsonObj['codeDensity'] = parser.getDensity() if parser.getDensity() else 0
 		jsonObj['imports'] = parser.imports if parser.imports else []
 		jsonObj['numOfImports'] = len(parser.imports)  if len(parser.imports) > 0  else 0
-		jsonObj['numOfFromImports'] = parser.getNumFromImports() if parser.getNumFromImports() > 0 else 0
+		jsonObj['numOfFromImports'] = numOfFromImp if numOfFromImp > 0 else 0
+
 		jsonObj['numOfStarImports'] = len(importStarList) if importStarList else 0
 		jsonObj['importFroms'] = importFromList if importFromList else []
 		jsonObj['importStars'] = importStarList if len(parser.importStars) > 0 else []
@@ -86,7 +83,6 @@ def makeJSONObj(parser, jsonObj):
 		jsonObj['parseError'] = True
 
 	return jsonObj
-
 
 # Every script has a scriptKey to identify it
 def addTojsonFinal(scriptKey, jsonObj):
@@ -117,21 +113,23 @@ def isolateFilename(absFilePath):
 
 def filecounter(items):
 	pyfiles = 0
+	genericFiles = 0
 	totalFiles = 0
 	for fileNameKey, srcFile in items:
 		if srcFile and allowed_file(srcFile.filename, "python"):
 			pyfiles += 1
-		else:
-			totalFiles += 1
-	totalFiles = totalFiles + pyfiles
-	pyfilesOverTotalFiles = (pyfiles, totalFiles)
+		elif srcFile and allowed_file(srcFile.filename, "generic"):
+			genericFiles += 1
+		totalFiles += 1
+
+	pyfilesOverTotalFiles = (pyfiles, totalFiles, genericFiles)
 	return pyfilesOverTotalFiles
 
 def averageSrcLineWidth(filename):
 	lines = genericGetLines(filename)
-	if lines == 0: return 0
+	if len(lines) is 0: return 0
 	#sum of all lengths of all lines (excluding \n)'s / by number lines
-	avgLnW = sum([len(line.strip('\n')) for line in lines]) / len(lines) #also takes empty lines into account
+	avgLnW = sum([len(line.strip('\n')) for line in lines]) / len(lines)
 
 	return round(avgLnW, 2)
 
@@ -146,10 +144,10 @@ def genericGetLines(filename):
 		lines = f.readlines()
 	except:
 		print("☢️ Error - Counting lines in: ", filename)
-		return 0
+		return []
 
 	if(not lines or len(lines) == 0):
-		return 0
+		return []
 	else:
 		return lines
 
@@ -164,7 +162,6 @@ def upload_src():
 	if request.method == 'POST':
 			amountOfFiles = filecounter(request.files.items())
 			if not request.files: #if list of files received isn't empty
-				print("I DID NOT ENTER PYFILES")
 				flash('No file part')
 				return redirect(request.url)
 
@@ -189,12 +186,15 @@ def upload_src():
 					jsonObj = {}
 			getFiles = os.listdir(UPLOAD_FOLDER)
 
+			#from-import used the most in the project, across all files
+			mostUsedFromImport = ("",0)
 			jsonObj = {}
+			jsonFinal["allFromImports"] = {}
 			parser = AstParser()
 			for fileName in getFiles:
 				if(fileName != ".gitignore"):
 					if allowed_file(fileName, "python"):
-						jsonObj["avgLineWidth"] = averageSrcLineWidth(fileName) #TODO avg line width could be done for all kinds of src-files
+						jsonObj["avgLineWidth"] = averageSrcLineWidth(fileName)
 						tree = parser.treeFromFile(fileName)
 						if(tree is None):
 							print("⚠️   PARSER ERROR - SKIP FILE: ", fileName) #make default json object
@@ -206,14 +206,39 @@ def upload_src():
 						parser.parseTree(tree)
 						jsonObj = makeJSONObj(parser, jsonObj)
 
+						#add from-imports
+						if len(parser.importsFrom) > 0:
+							for key in parser.importsFrom:
+								if key not in jsonFinal["allFromImports"]:
+									jsonFinal["allFromImports"][key] = []
+								for impV in parser.importsFrom[key]:
+									jsonFinal["allFromImports"][key].append(impV)
+						#extend also with regular imports
+						# if len(parser.imports) > 0:
+						# 	print("extending with: ", parser.imports)
+						# 	jsonFinal["allFromImports"][key].extend(parser.imports)
+
 						parser.resetStates()
 					else:	#if not .py file
 						jsonObj = {}
 						jsonObj["numOfLines"] = len(genericGetLines(fileName))
 
+
 					addTojsonFinal(fileName, jsonObj)
 
 			flash('File(s) successfully uploaded')
+
+			maxImportName = "UNDEFINED"
+			maxImportTimes = 0
+			for key in jsonFinal["allFromImports"]:
+				if key is not None and len(jsonFinal["allFromImports"][key]) > maxImportTimes:
+					maxImportTimes = len(jsonFinal["allFromImports"][key])
+					maxImportName = key
+			# print("\n maxIMportName:", maxImportName, " - maxImportVal:", maxImportTimes)
+			jsonFinal["allFromImports"] = str(jsonFinal["allFromImports"])
+			jsonFinal["maxUsedFromName"] = maxImportName
+			jsonFinal["maxUsedFromValue"] = maxImportTimes
+
 			jsonFinal['amountOfFiles'] = amountOfFiles
 
 	return render_template('/index.html')

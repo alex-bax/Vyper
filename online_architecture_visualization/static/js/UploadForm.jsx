@@ -189,6 +189,12 @@ export default class UploadForm extends React.Component {
         });
     }
 
+    checkExtension(filename) {
+        let allowedExts = ["PY", "JS", "JSX", "FS", "CSS", "HTML", "JAVA", "CS", "SH", "SQL", "MD", "CFG" ];
+        let str = filename.slice(filename.lastIndexOf(".")+1, filename.length ).toUpperCase();
+        return allowedExts.includes(str);
+    }
+
     onChangeHandler(event) {
         //TODO - could do a lot here to check input (e.g. file size etc.)
 
@@ -211,26 +217,27 @@ export default class UploadForm extends React.Component {
                         dirHierarchy[itemsOfPath[i]] = {};
 
                         dirHierarchy[itemsOfPath[i]]["children"] = new Set(); //don't want duplicates -> use of Sets
-                        dirHierarchy[itemsOfPath[i]]["totalChildren"] = 0;
                         dirHierarchy[itemsOfPath[i]]["isGhost"] = false;
                     }
 
                     if(itemsOfPath[i] == ".git") {  //TODO could potentially add any folder name here
-                        console.log(".GIT");
                         if(!dirHierarchy[".git"]["parentDir"]) {
                             i > 0 ? dirHierarchy[".git"]["parentDir"] = itemsOfPath[i-1] : dirHierarchy[".git"]["parentDir"] = "undefined";
                         }
-                        break;   //skip this file
+                        break;   //skip this item
                     }
 
                     if(i == 0) {
                         //assumption that root must have at least a level below with a file. Also same path can't have identical filename for a given filetype
-                        dirHierarchy[itemsOfPath[i]]["children"].add(itemsOfPath[i+1]);
+                        if(this.checkExtension(itemsOfPath[i+1])) {
+                                dirHierarchy[itemsOfPath[i]]["children"].add(itemsOfPath[i+1]);
+                            }
+
                     } else {
 
-
-                        if(itemsOfPath[i+1] !== null) //dir has child, add it to its "contents"
-                            dirHierarchy[itemsOfPath[i]]["children"].add(itemsOfPath[i+1]);
+                        if(itemsOfPath[i+1] !== null && this.checkExtension(itemsOfPath[i+1])) { //dir has child, add it to its "contents"
+                                dirHierarchy[itemsOfPath[i]]["children"].add(itemsOfPath[i+1]);
+                            }
                         if(itemsOfPath[i-1] !== null)
                             dirHierarchy[itemsOfPath[i]]["parentDir"] = itemsOfPath[i-1];
                     }
@@ -242,8 +249,8 @@ export default class UploadForm extends React.Component {
                         dirHierarchy[itemsOfPath[i-1] + "GhostDir"]["parentDir"] = itemsOfPath[i-1];
                         dirHierarchy[itemsOfPath[i-1] + "GhostDir"]["isGhost"] = true;
                     }
+                    dirHierarchy[itemsOfPath[i-1] + "GhostDir"]["children"].add(itemsOfPath[i]);
 
-                    dirHierarchy[itemsOfPath[i-1] + "GhostDir"]["children"].add(itemsOfPath[i]); //push the file to array of file children
                 }
             }
 
@@ -285,16 +292,17 @@ export default class UploadForm extends React.Component {
     render() {
             return(
                 <div className="upload">
-                    <h1>Online Architecture Visualization</h1>
+                    <h2>Vyper - Online Python Structure Visualization</h2>
                         <form action="/upload_src" method="POST" encType="multipart/form-data" className="uploadSection">
-                                <Button className="btn" variant="primary"><label className="btn" htmlFor="pyFile" >Choose Files</label></Button>
+                                <Button ><label className="btn" htmlFor="pyFile" >Choose Files</label></Button>
                                 <input type="file" name="pyfiles[]" id="pyFile" style={{visibility:"hidden" , width: "4px" }} onChange={this.onChangeHandler} webkitdirectory="" multiple ></input>
                                 <Button disabled={this.state.selectedFiles.length == 0} onClick={this.post} className="btn2">Upload</Button>
                                 <Button disabled={this.state.nodesToDiagram.length == 0} onClick={this.clear} className="btn2">Clear</Button>
                                 <div className="inlineDiv">
                                     {this.state.loading ? <Loader visible={true} type="Puff" color="#2cbed1" height={40} width={40}/> : null}
                                     <p>{this.state.showChosenFile ? <p>📁<b> Root folder:</b> {this.state.rootFolder}</p> : ""}</p>
-                                    <p>{this.state.showUploadedFiles && this.state.showChosenFile ? <p>🐍 <b>{this.state.amountOfFiles.toString().replace(',', ' out of ')} files</b> uploaded were python (.py)</p> : ""}</p>
+                                    <p>{this.state.showUploadedFiles && this.state.showChosenFile ? <p>🐍 <b>{this.state.amountOfFiles[0]} of {this.state.amountOfFiles[1]} files</b> uploaded are python (.py)</p> : ""}</p>
+                                    <p>{this.state.showUploadedFiles && this.state.showChosenFile ? <p> ❌ <b>{this.state.amountOfFiles[1] - (this.state.amountOfFiles[0] + this.state.amountOfFiles[2])} of {this.state.amountOfFiles[1]} file(s)</b> are <i><b>not</b></i> included  |  <b>{this.state.amountOfFiles[2]} file(s)</b> are grey <b>generic files</b></p>: ""}</p>
                                 </div>
                                 <div className="topBoxes">
                                     {this.state.errorNodes.length > 0 ? <ErrorBox errorNodes={this.state.errorNodes} /> : null }
