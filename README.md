@@ -35,7 +35,8 @@ Step 6: Open `online_architecture_visualization/server/server.py`. Make a direct
 
 Step 6.5: in the server folder...
 
-    pip install -r requirements.txt
+    pip install -U flask-cors 
+    //pip install -r requirements.txt
 
 Step 7: Start the server. Go to the server directory and do "python server.py" in the terminal. 
 
