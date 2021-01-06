@@ -58,7 +58,7 @@
     "@syncfusion/ej2-react-diagrams": "^17.4.55",
     "@syncfusion/ej2-react-inputs": "^18.1.43",
     "@syncfusion/ej2-react-splitbuttons": "^17.4.55",
-    "axios": "^0.19.2",
+    "axios": "^0.21.1",
     "bootstrap": "^4.4.1",
     "react-bootstrap-dropdown-menu": "^1.1.15",
     "react-dropdown": "^1.7.0",
